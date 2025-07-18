@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Advanced Scientific Calculator</title>
+  <style>
+    body {
+      background-color: #1e1e2f;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #00ff88;
+      margin-bottom: 10px;
+      text-shadow: 1px 1px 2px #000;
+    }
+
+    .calculator {
+      background: #2d2d3f;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px #000;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .display {
+      background: #111;
+      color: #00ff88;
+      font-size: 26px;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: right;
+      margin-bottom: 15px;
+      height: 50px;
+      overflow-x: auto;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #444;
+      color: #fff;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #666;
+    }
+
+    .equal {
+      background-color: #27ae60;
+    }
+
+    .equal:hover {
+      background-color: #1e8449;
+    }
+
+    .clear {
+      background-color: #e74c3c;
+    }
+
+    .clear:hover {
+      background-color: #c0392b;
+    }
+
+    .mode-toggle {
+      grid-column: span 6;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .mode-toggle button {
+      padding: 8px 20px;
+      background-color: #3498db;
+    }
+
+    .mode-toggle button:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Advanced Scientific Calculator</h1>
+
+  <div class="calculator">
+    <div class="display" id="display">0</div>
+
+    <div class="mode-toggle">
+      <button onclick="toggleAngleMode()" id="angleModeBtn">Mode: Degrees</button>
+    </div>
+
+    <div class="buttons">
+      <button onclick="append('sin(')">sin</button>
+      <button onclick="append('cos(')">cos</button>
+      <button onclick="append('tan(')">tan</button>
+      <button onclick="append('log(')">log</button>
+      <button onclick="append('ln(')">ln</button>
+      <button onclick="append('√(')">√</button>
+
+      <button onclick="append('asin(')">asin</button>
+      <button onclick="append('acos(')">acos</button>
+      <button onclick="append('atan(')">atan</button>
+      <button onclick="append('^')">^</button>
+      <button onclick="append('exp(')">exp</button>
+      <button onclick="delChar()">DEL</button>
+
+      <button onclick="append('π')">π</button>
+      <button onclick="append('e')">e</button>
+      <button onclick="append('%')">%</button>
+      <button onclick="append('(')">(</button>
+      <button onclick="append(')')">)</button>
+      <button onclick="clearDisplay()" class="clear">C</button>
+
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button onclick="append('/')">÷</button>
+
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('*')">×</button>
+
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="append('-')">−</button>
+
+      <button onclick="append('0')">0</button>
+      <button onclick="append('.')">.</button>
+      <button onclick="calculate()" class="equal">=</button>
+      <button onclick="append('+')">+</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    const angleBtn = document.getElementById('angleModeBtn');
+    let angleMode = 'DEG'; // or 'RAD'
+
+    function append(value) {
+      if (display.innerText === '0') display.innerText = '';
+      display.innerText += value;
+    }
+
+    function clearDisplay() {
+      display.innerText = '0';
+    }
+
+    function delChar() {
+      display.innerText = display.innerText.slice(0, -1) || '0';
+    }
+
+    function toggleAngleMode() {
+      angleMode = angleMode === 'DEG' ? 'RAD' : 'DEG';
+      angleBtn.innerText = `Mode: ${angleMode === 'DEG' ? 'Degrees' : 'Radians'}`;
+    }
+
+    function toRadians(deg) {
+      return deg * (Math.PI / 180);
+    }
+
+    function parseExpression(expression) {
+      expression = expression
+        .replace(/π/g, Math.PI)
+        .replace(/e/g, Math.E)
+        .replace(/√/g, 'Math.sqrt')
+        .replace(/log/g, 'Math.log10')
+        .replace(/ln/g, 'Math.log')
+        .replace(/exp/g, 'Math.exp')
+        .replace(/\^/g, '**');
+
+      // handle angle conversion if mode is DEG
+      if (angleMode === 'DEG') {
+        expression = expression
+          .replace(/Math\.sin\(([^)]+)\)/g, (_, angle) => `Math.sin(toRadians(${angle}))`)
+          .replace(/Math\.cos\(([^)]+)\)/g, (_, angle) => `Math.cos(toRadians(${angle}))`)
+          .replace(/Math\.tan\(([^)]+)\)/g, (_, angle) => `Math.tan(toRadians(${angle}))`)
+          .replace(/Math\.asin\(([^)]+)\)/g, (_, val) => `(180/Math.PI)*Math.asin(${val})`)
+          .replace(/Math\.acos\(([^)]+)\)/g, (_, val) => `(180/Math.PI)*Math.acos(${val})`)
+          .replace(/Math\.atan\(([^)]+)\)/g, (_, val) => `(180/Math.PI)*Math.atan(${val})`);
+      }
+
+      return expression;
+    }
+
+    function calculate() {
+      let expr = display.innerText;
+
+      try {
+        const parsed = parseExpression(expr);
+        const result = eval(parsed);
+        display.innerText = result;
+      } catch (e) {
+        display.innerText = 'Error';
+      }
+    }
+
+    function toRadians(val) {
+      return val * (Math.PI / 180);
+    }
+  </script>
+</body>
+</html>
